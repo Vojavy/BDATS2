@@ -30,7 +30,7 @@ function OrderProductPanel({ setActivePanel }) {
   const [orderProducts, setOrderProducts] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  // Пагинация
+  // Pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -50,10 +50,10 @@ function OrderProductPanel({ setActivePanel }) {
 
   const fetchOrderProducts = async () => {
     try {
-      const response = await api.get('/api/order-products'); // Исправлено
-      console.log('Полученные данные:', response); // Логирование для отладки
+      const response = await api.get('/api/order-products'); // Make sure the path is correct
+      console.log('Received data:', response); // Logging for debugging
 
-      // Проверка структуры ответа
+      // Check response structure
       if (response && response) {
         setOrderProducts(Array.isArray(response) ? response : []);
       } else {
@@ -61,8 +61,8 @@ function OrderProductPanel({ setActivePanel }) {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Ошибка при загрузке связей заказ-продукт:', error);
-      setSnackbar({ open: true, message: 'Ошибка при загрузке связей заказ-продукт', severity: 'error' });
+      console.error('Error loading order-product relations:', error);
+      setSnackbar({ open: true, message: 'Error loading order-product relations', severity: 'error' });
       setLoading(false);
     }
   };
@@ -73,7 +73,7 @@ function OrderProductPanel({ setActivePanel }) {
       orderProduct
         ? {
             objednavka_id_objednavky: orderProduct.orderId,
-            produkt_id_produktu: orderProduct.productId, // Исправлено
+            produkt_id_produktu: orderProduct.productId, // Corrected
             quantity: orderProduct.quantity,
           }
         : { objednavka_id_objednavky: '', produkt_id_produktu: '', quantity: '' }
@@ -92,22 +92,22 @@ function OrderProductPanel({ setActivePanel }) {
     try {
       const dataToSend = {
         orderId: parseInt(formData.objednavka_id_objednavky, 10),
-        productId: parseInt(formData.produkt_id_produktu, 10), // Исправлено
+        productId: parseInt(formData.produkt_id_produktu, 10), // Corrected
         quantity: parseInt(formData.quantity, 10),
       };
 
       if (selectedOrderProduct) {
         await api.put('/api/order-products', dataToSend);
-        setSnackbar({ open: true, message: 'Связь обновлена успешно', severity: 'success' });
+        setSnackbar({ open: true, message: 'Relation updated successfully', severity: 'success' });
       } else {
         await api.post('/api/order-products', dataToSend);
-        setSnackbar({ open: true, message: 'Связь добавлена успешно', severity: 'success' });
+        setSnackbar({ open: true, message: 'Relation added successfully', severity: 'success' });
       }
       fetchOrderProducts();
       handleFormClose();
     } catch (error) {
-      console.error('Ошибка при сохранении связи:', error);
-      const errorMessage = error.response?.data || 'Ошибка при сохранении связи';
+      console.error('Error saving relation:', error);
+      const errorMessage = error.response?.data || 'Error saving relation';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
@@ -126,21 +126,21 @@ function OrderProductPanel({ setActivePanel }) {
     try {
       await api.delete('/api/order-products', {
         params: {
-          orderId: selectedOrderProduct.orderId, // Исправлено
-          productId: selectedOrderProduct.productId, // Исправлено
+          orderId: selectedOrderProduct.orderId, // Corrected
+          productId: selectedOrderProduct.productId, // Corrected
         },
       });
-      setSnackbar({ open: true, message: 'Связь удалена успешно', severity: 'success' });
+      setSnackbar({ open: true, message: 'Relation deleted successfully', severity: 'success' });
       fetchOrderProducts();
       handleDeleteConfirmClose();
     } catch (error) {
-      console.error('Ошибка при удалении связи:', error);
-      const errorMessage = error.response?.data || 'Ошибка при удалении связи';
+      console.error('Error deleting relation:', error);
+      const errorMessage = error.response?.data || 'Error deleting relation';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
 
-  // Обработчики пагинации
+  // Pagination handlers
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -150,7 +150,7 @@ function OrderProductPanel({ setActivePanel }) {
     setPage(0);
   };
 
-  // Проверяем, загрузились ли данные
+  // Check if data is loaded
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
@@ -161,13 +161,13 @@ function OrderProductPanel({ setActivePanel }) {
 
   return (
     <div style={{ display: 'flex' }}>
-      {/* Навигация */}
+      {/* Navigation */}
       <AdminNavigation setActivePanel={setActivePanel} />
 
-      {/* Содержимое панели связей заказ-продукт */}
+      {/* Order-Product Relations Panel Content */}
       <div style={{ flexGrow: 1, padding: '16px' }}>
         <Typography variant="h4" gutterBottom>
-          Связи Заказ-Продукт
+          Order-Product Relations
         </Typography>
         <Button
           variant="contained"
@@ -176,7 +176,7 @@ function OrderProductPanel({ setActivePanel }) {
           onClick={() => handleFormOpen()}
           style={{ marginBottom: '16px' }}
         >
-          Добавить связь
+          Add Relation
         </Button>
 
         <Paper sx={{ width: '100%', overflow: 'hidden', marginTop: 2 }}>
@@ -184,10 +184,10 @@ function OrderProductPanel({ setActivePanel }) {
             <Table stickyHeader aria-label="order-products table">
               <TableHead>
                 <TableRow>
-                  <TableCell>ID Заказа</TableCell>
-                  <TableCell>ID Продукта</TableCell>
-                  <TableCell>Количество</TableCell>
-                  <TableCell align="right">Действия</TableCell>
+                  <TableCell>Order ID</TableCell>
+                  <TableCell>Product ID</TableCell>
+                  <TableCell>Quantity</TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -195,9 +195,9 @@ function OrderProductPanel({ setActivePanel }) {
                   orderProducts
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((op) => (
-                      <TableRow hover key={`${op.orderId}-${op.productId}`}> {/* Исправлено */}
+                      <TableRow hover key={`${op.orderId}-${op.productId}`}> {/* Corrected */}
                         <TableCell>{op.orderId}</TableCell>
-                        <TableCell>{op.productId}</TableCell> {/* Исправлено */}
+                        <TableCell>{op.productId}</TableCell> {/* Corrected */}
                         <TableCell>{op.quantity}</TableCell>
                         <TableCell align="right">
                           <IconButton onClick={() => handleFormOpen(op)} color="primary">
@@ -211,8 +211,8 @@ function OrderProductPanel({ setActivePanel }) {
                     ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} align="center"> {/* Исправлено colSpan */}
-                      Нет данных
+                    <TableCell colSpan={4} align="center"> {/* Corrected colSpan */}
+                      No data
                     </TableCell>
                   </TableRow>
                 )}
@@ -231,35 +231,35 @@ function OrderProductPanel({ setActivePanel }) {
           />
         </Paper>
 
-        {/* Форма добавления/редактирования связи */}
+        {/* Add/Edit Relation Form */}
         <Dialog open={formOpen} onClose={handleFormClose} fullWidth maxWidth="sm">
-          <DialogTitle>{selectedOrderProduct ? 'Редактировать связь' : 'Добавить связь'}</DialogTitle>
+          <DialogTitle>{selectedOrderProduct ? 'Edit Relation' : 'Add Relation'}</DialogTitle>
           <form onSubmit={handleFormSubmit}>
             <DialogContent>
               <TextField
                 autoFocus
                 margin="dense"
-                label="ID Заказа"
+                label="Order ID"
                 type="number"
                 fullWidth
                 required
                 value={formData.objednavka_id_objednavky}
                 onChange={(e) => setFormData({ ...formData, objednavka_id_objednavky: e.target.value })}
-                disabled={!!selectedOrderProduct} // Запрещаем изменение ID заказа при редактировании
+                disabled={!!selectedOrderProduct} // Disable changing order ID when editing
               />
               <TextField
                 margin="dense"
-                label="ID Продукта"
+                label="Product ID"
                 type="number"
                 fullWidth
                 required
                 value={formData.produkt_id_produktu}
                 onChange={(e) => setFormData({ ...formData, produkt_id_produktu: e.target.value })}
-                disabled={!!selectedOrderProduct} // Запрещаем изменение ID продукта при редактировании
+                disabled={!!selectedOrderProduct} // Disable changing product ID when editing
               />
               <TextField
                 margin="dense"
-                label="Количество"
+                label="Quantity"
                 type="number"
                 fullWidth
                 required
@@ -268,32 +268,32 @@ function OrderProductPanel({ setActivePanel }) {
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleFormClose}>Отмена</Button>
+              <Button onClick={handleFormClose}>Cancel</Button>
               <Button type="submit" color="primary">
-                Сохранить
+                Save
               </Button>
             </DialogActions>
           </form>
         </Dialog>
 
-        {/* Диалог подтверждения удаления */}
+        {/* Delete Confirmation Dialog */}
         <Dialog open={deleteConfirmOpen} onClose={handleDeleteConfirmClose}>
-          <DialogTitle>Удалить связь?</DialogTitle>
+          <DialogTitle>Delete Relation?</DialogTitle>
           <DialogContent>
             <Typography>
-              Вы уверены, что хотите удалить связь заказа ID {selectedOrderProduct?.orderId} и продукта ID{' '}
+              Are you sure you want to delete the relation between order ID {selectedOrderProduct?.orderId} and product ID{' '}
               {selectedOrderProduct?.productId}?
             </Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDeleteConfirmClose}>Отмена</Button>
+            <Button onClick={handleDeleteConfirmClose}>Cancel</Button>
             <Button onClick={handleDelete} color="secondary">
-              Удалить
+              Delete
             </Button>
           </DialogActions>
         </Dialog>
 
-        {/* Уведомления */}
+        {/* Notifications */}
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}

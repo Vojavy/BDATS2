@@ -97,7 +97,7 @@ public class ImageController {
             @RequestParam(value = "obrazek", required = false) MultipartFile file,
             @RequestParam("nazev") String nazev,
             @RequestParam("format_id_formatu") Integer formatId,
-            @RequestParam(value = "produkt_id_produktu") Long productId
+            @RequestParam(value = "produkt_id_produktu", required = false) Long productId
     ) {
         try {
             System.out.println("Обработчик вызван с параметрами:");

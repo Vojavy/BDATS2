@@ -296,7 +296,7 @@ function ProductPanel({ setActivePanel }) {
                           <TableCell>{product.price}</TableCell>
                           <TableCell>{product.description || 'No Description'}</TableCell>
                           <TableCell>
-                            {category?.label || 'Uncategorized'}
+                            {product.category || 'Uncategorized'}
                           </TableCell>
                           <TableCell>
                             {warehouse?.label || 'No Warehouse'}

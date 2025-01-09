@@ -1,6 +1,6 @@
 // src/components/Panels/LogPanel.js
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Paper,
@@ -22,19 +22,17 @@ import api from '../../services/api';
 
 function LogPanel({ setActivePanel }) {
   const [logs, setLogs] = useState([]);
-  const [filteredLogs, setFilteredLogs] = useState([]); // Filtered data
+  const [filteredLogs, setFilteredLogs] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  // Pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
   const [loading, setLoading] = useState(true);
 
-  // Sorting
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
+  // Сортировка
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' или 'desc'
 
-  // Filtering
+  // Фильтры
   const [filterId, setFilterId] = useState('');
   const [filterOperation, setFilterOperation] = useState('');
   const [filterTableName, setFilterTableName] = useState('');
@@ -44,13 +42,12 @@ function LogPanel({ setActivePanel }) {
     fetchLogs();
   }, []);
 
-  // Fetch logs from the backend
   const fetchLogs = async () => {
     try {
       const response = await api.get('/api/util/logs');
-      const sortedLogs = response.sort((a, b) => a.idLogu - b.idLogu); // Automatic sorting by ID
+      const sortedLogs = response.sort((a, b) => a.idLogu - b.idLogu); 
       setLogs(sortedLogs);
-      setFilteredLogs(sortedLogs); // Initially, filtered logs are the same as all logs
+      setFilteredLogs(sortedLogs);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching logs:', error);
@@ -59,7 +56,6 @@ function LogPanel({ setActivePanel }) {
     }
   };
 
-  // Handle sorting toggle
   const handleSort = () => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     const sortedLogs = [...filteredLogs].sort((a, b) =>
@@ -69,7 +65,6 @@ function LogPanel({ setActivePanel }) {
     setSortOrder(newSortOrder);
   };
 
-  // Handle filtering
   const handleFilter = () => {
     const filtered = logs.filter(
       (log) =>
@@ -78,25 +73,83 @@ function LogPanel({ setActivePanel }) {
         (!filterTableName || log.nazevTabulky.toLowerCase().includes(filterTableName.toLowerCase())) &&
         (!filterDate ||
           new Date(log.datumModifikace)
-            .toLocaleDateString('en-GB') // Format: DD/MM/YYYY
+            .toLocaleDateString('en-GB')
             .includes(filterDate))
     );
     setFilteredLogs(filtered);
-    setPage(0); // Reset pagination to the first page
+    setPage(0);
   };
 
-  // Handle pagination page change
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
-  // Handle pagination rows per page change
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
 
-  // Show loading indicator if data is being fetched
+  // Генерация CSV
+  const handleExportCSV = () => {
+    if (filteredLogs.length === 0) {
+      setSnackbar({ open: true, message: 'No data to export', severity: 'info' });
+      return;
+    }
+
+    // Определяем ключи, которые хотим включить в CSV
+    const keys = ['idLogu', 'operace', 'nazevTabulky', 'datumModifikace', 'oldValues', 'newValues'];
+    // Заголовки CSV (можно сделать человекопонятными)
+    const headers = ['Log ID', 'Operation', 'Table Name', 'Modification Date', 'Old Values', 'New Values'];
+
+    // Формируем массив строк CSV
+    const csvRows = [];
+    // Добавляем заголовок
+    csvRows.push(headers.join(';'));
+
+    // Формируем строки по логам
+    for (const log of filteredLogs) {
+      const dateStr = new Date(log.datumModifikace).toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+
+      // Подготовим объект для удобной подстановки
+      const logObj = {
+        idLogu: log.idLogu,
+        operace: log.operace || '',
+        nazevTabulky: log.nazevTabulky || '',
+        datumModifikace: dateStr,
+        oldValues: log.oldValues || '-',
+        newValues: log.newValues || '-'
+      };
+
+
+      // Для каждого ключа берём значение, экранируя кавычки
+      const row = keys.map((key) => {
+        const val = logObj[key].toString().replace(/"/g, '""');
+        return `"${val}"`;
+      }).join(';');
+
+      csvRows.push(row);
+    }
+
+    const csvContent = csvRows.join('\r\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'logs.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
@@ -107,17 +160,14 @@ function LogPanel({ setActivePanel }) {
 
   return (
     <div style={{ display: 'flex' }}>
-      {/* Navigation */}
       <AdminNavigation setActivePanel={setActivePanel} />
 
-      {/* Log Panel Content */}
       <div style={{ flexGrow: 1, padding: '16px' }}>
         <Typography variant="h4" gutterBottom>
           Logs
         </Typography>
 
-        {/* Filter Fields */}
-        <div style={{ marginBottom: '16px', display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div style={{ marginBottom: '16px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
           <TextField
             label="Search by ID"
             value={filterId}
@@ -150,9 +200,12 @@ function LogPanel({ setActivePanel }) {
           <Button variant="contained" color="primary" onClick={handleFilter}>
             Search
           </Button>
+          <Button variant="contained" color="secondary" onClick={handleExportCSV}>
+            Export CSV
+          </Button>
         </div>
 
-        {/* Logs Table */}
+
         <Paper sx={{ width: '100%', overflow: 'hidden', marginTop: 2 }}>
           <TableContainer>
             <Table stickyHeader aria-label="logs table">
@@ -202,7 +255,6 @@ function LogPanel({ setActivePanel }) {
             </Table>
           </TableContainer>
 
-          {/* Pagination Controls */}
           <TablePagination
             component="div"
             count={filteredLogs.length}
@@ -214,7 +266,6 @@ function LogPanel({ setActivePanel }) {
           />
         </Paper>
 
-        {/* Notifications */}
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}

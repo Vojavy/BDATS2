@@ -198,7 +198,7 @@ function ImagePanel({ setActivePanel }) {
 
       dataToSend.append('nazev', formData.nazev || '');
       dataToSend.append('format_id_formatu', formData.format_id_formatu || '');
-      dataToSend.append('produkt_id_produktu', formData.produkt_id_produktu || '');
+      dataToSend.append('produkt_id_produktu', formData.produkt_id_produktu);
 
       // Log FormData contents for debugging
       for (const [key, value] of dataToSend.entries()) {

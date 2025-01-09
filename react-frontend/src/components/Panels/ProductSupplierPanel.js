@@ -30,7 +30,7 @@ function ProductSupplierPanel({ setActivePanel }) {
   const [productSuppliers, setProductSuppliers] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  // Пагинация
+  // Pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -49,10 +49,10 @@ function ProductSupplierPanel({ setActivePanel }) {
 
   const fetchProductSuppliers = async () => {
     try {
-      const response = await api.get('/api/product-suppliers'); // Убедитесь, что путь правильный
-      console.log('Полученные данные:', response); // Логирование для отладки
+      const response = await api.get('/api/product-suppliers'); // Make sure the path is correct
+      console.log('Received data:', response); // Logging for debugging
 
-      // Проверка структуры ответа
+      // Check response structure
       if (response && response) {
         setProductSuppliers(Array.isArray(response) ? response : []);
       } else {
@@ -60,8 +60,8 @@ function ProductSupplierPanel({ setActivePanel }) {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Ошибка при загрузке связей продукт-поставщик:', error);
-      setSnackbar({ open: true, message: 'Ошибка при загрузке связей продукт-поставщик', severity: 'error' });
+      console.error('Error loading product-supplier relations:', error);
+      setSnackbar({ open: true, message: 'Error loading product-supplier relations', severity: 'error' });
       setLoading(false);
     }
   };
@@ -95,16 +95,16 @@ function ProductSupplierPanel({ setActivePanel }) {
 
       if (selectedProductSupplier) {
         await api.put('/api/product-suppliers', dataToSend);
-        setSnackbar({ open: true, message: 'Связь обновлена успешно', severity: 'success' });
+        setSnackbar({ open: true, message: 'Relation successfully updated', severity: 'success' });
       } else {
         await api.post('/api/product-suppliers', dataToSend);
-        setSnackbar({ open: true, message: 'Связь добавлена успешно', severity: 'success' });
+        setSnackbar({ open: true, message: 'Relation successfully added', severity: 'success' });
       }
       fetchProductSuppliers();
       handleFormClose();
     } catch (error) {
-      console.error('Ошибка при сохранении связи:', error);
-      const errorMessage = error.response?.data || 'Ошибка при сохранении связи';
+      console.error('Error saving relation:', error);
+      const errorMessage = error.response?.data || 'Error saving relation';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
@@ -127,17 +127,17 @@ function ProductSupplierPanel({ setActivePanel }) {
           DodavatelIdDodavatelyu: selectedProductSupplier.DODAVATEL_ID_DODAVATELU,
         },
       });
-      setSnackbar({ open: true, message: 'Связь удалена успешно', severity: 'success' });
+      setSnackbar({ open: true, message: 'Relation successfully deleted', severity: 'success' });
       fetchProductSuppliers();
       handleDeleteConfirmClose();
     } catch (error) {
-      console.error('Ошибка при удалении связи:', error);
-      const errorMessage = error.response?.data || 'Ошибка при удалении связи';
+      console.error('Error deleting relation:', error);
+      const errorMessage = error.response?.data || 'Error deleting relation';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
 
-  // Обработчики пагинации
+  // Pagination handlers
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -147,7 +147,7 @@ function ProductSupplierPanel({ setActivePanel }) {
     setPage(0);
   };
 
-  // Проверяем, загрузились ли данные
+  // Check if data is loaded
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
@@ -158,13 +158,13 @@ function ProductSupplierPanel({ setActivePanel }) {
 
   return (
     <div style={{ display: 'flex' }}>
-      {/* Навигация */}
+      {/* Navigation */}
       <AdminNavigation setActivePanel={setActivePanel} />
 
-      {/* Содержимое панели связей продукт-поставщик */}
+      {/* Product-Supplier Relations Panel Content */}
       <div style={{ flexGrow: 1, padding: '16px' }}>
         <Typography variant="h4" gutterBottom>
-          Связи Продукт-Поставщик
+          Product-Supplier Relations
         </Typography>
         <Button
           variant="contained"
@@ -173,7 +173,7 @@ function ProductSupplierPanel({ setActivePanel }) {
           onClick={() => handleFormOpen()}
           style={{ marginBottom: '16px' }}
         >
-          Добавить связь
+          Add Relation
         </Button>
 
         <Paper sx={{ width: '100%', overflow: 'hidden', marginTop: 2 }}>
@@ -181,9 +181,9 @@ function ProductSupplierPanel({ setActivePanel }) {
             <Table stickyHeader aria-label="product-suppliers table">
               <TableHead>
                 <TableRow>
-                  <TableCell>ID Поставщика</TableCell>
-                  <TableCell>ID Продукта</TableCell>
-                  <TableCell align="right">Действия</TableCell>
+                  <TableCell>Supplier ID</TableCell>
+                  <TableCell>Product ID</TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -207,7 +207,7 @@ function ProductSupplierPanel({ setActivePanel }) {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} align="center">
-                      Нет данных
+                      No data
                     </TableCell>
                   </TableRow>
                 )}
@@ -226,60 +226,60 @@ function ProductSupplierPanel({ setActivePanel }) {
           />
         </Paper>
 
-        {/* Форма добавления/редактирования связи */}
+        {/* Add/Edit Relation Form */}
         <Dialog open={formOpen} onClose={handleFormClose} fullWidth maxWidth="sm">
-          <DialogTitle>{selectedProductSupplier ? 'Редактировать связь' : 'Добавить связь'}</DialogTitle>
+          <DialogTitle>{selectedProductSupplier ? 'Edit Relation' : 'Add Relation'}</DialogTitle>
           <form onSubmit={handleFormSubmit}>
             <DialogContent>
               <TextField
                 autoFocus
                 margin="dense"
-                label="ID Поставщика"
+                label="Supplier ID"
                 type="number"
                 fullWidth
                 required
                 value={formData.DODAVATEL_ID_DODAVATELU}
                 onChange={(e) => setFormData({ ...formData, DODAVATEL_ID_DODAVATELU: e.target.value })}
-                disabled={!!selectedProductSupplier} // Запрещаем изменение ID поставщика при редактировании
+                disabled={!!selectedProductSupplier} // Disable changing supplier ID when editing
               />
               <TextField
                 margin="dense"
-                label="ID Продукта"
+                label="Product ID"
                 type="number"
                 fullWidth
                 required
                 value={formData.PRODUKT_ID_PRODUKTU}
                 onChange={(e) => setFormData({ ...formData, PRODUKT_ID_PRODUKTU: e.target.value })}
-                disabled={!!selectedProductSupplier} // Запрещаем изменение ID продукта при редактировании
+                disabled={!!selectedProductSupplier} // Disable changing product ID when editing
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleFormClose}>Отмена</Button>
+              <Button onClick={handleFormClose}>Cancel</Button>
               <Button type="submit" color="primary">
-                Сохранить
+                Save
               </Button>
             </DialogActions>
           </form>
         </Dialog>
 
-        {/* Диалог подтверждения удаления */}
+        {/* Delete Confirmation Dialog */}
         <Dialog open={deleteConfirmOpen} onClose={handleDeleteConfirmClose}>
-          <DialogTitle>Удалить связь?</DialogTitle>
+          <DialogTitle>Delete Relation?</DialogTitle>
           <DialogContent>
             <Typography>
-              Вы уверены, что хотите удалить связь продукта ID {selectedProductSupplier?.PRODUKT_ID_PRODUKTU} и поставщика ID{' '}
+              Are you sure you want to delete the relation between product ID {selectedProductSupplier?.PRODUKT_ID_PRODUKTU} and supplier ID{' '}
               {selectedProductSupplier?.DODAVATEL_ID_DODAVATELU}?
             </Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDeleteConfirmClose}>Отмена</Button>
+            <Button onClick={handleDeleteConfirmClose}>Cancel</Button>
             <Button onClick={handleDelete} color="secondary">
-              Удалить
+              Delete
             </Button>
           </DialogActions>
         </Dialog>
 
-        {/* Уведомления */}
+        {/* Notifications */}
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}

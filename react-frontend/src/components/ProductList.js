@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { FiSearch, FiShoppingCart } from "react-icons/fi";
-import api from "../services/api"; // Импортируем api из файла api.js
+import api from "../services/api"; // Importing api from api.js
 
 const StyledCard = styled(Card)(({ theme }) => ({
   height: "100%",
@@ -63,7 +63,7 @@ const ProductList = () => {
       const response = await api.get("/api/categories");
       setCategories([...response]);
     } catch (error) {
-      console.error("Ошибка при получении категорий:", error);
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -86,9 +86,9 @@ const ProductList = () => {
       const queryString = buildQueryParams(params);
       const response = await api.get(`/api/products${queryString}`);
       setProducts(response);
-      setPage(1); // Сбрасываем страницу при новом запросе
+      setPage(1); // Reset page when making a new request
     } catch (error) {
-      console.error("Ошибка при получении продуктов:", error);
+      console.error("Error fetching products:", error);
     }
   };
 
@@ -122,9 +122,9 @@ const ProductList = () => {
       cart.push({ ...product, quantity: 1 });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
-    // Отправляем событие после обновления корзины
+    // Dispatch event after updating the cart
     window.dispatchEvent(new Event('cartUpdated'));
-    console.log("Товар добавлен в корзину");
+    console.log("Product added to cart");
   };
 
   return (
@@ -135,7 +135,7 @@ const ProductList = () => {
             <TextField
               fullWidth
               variant="outlined"
-              placeholder="Поиск продуктов..."
+              placeholder="Search products..."
               value={searchQuery}
               onChange={handleSearchChange}
               InputProps={{
@@ -145,18 +145,18 @@ const ProductList = () => {
                   </InputAdornment>
                 ),
               }}
-              aria-label="Поиск продуктов"
+              aria-label="Search products"
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <FormControl fullWidth>
-              <InputLabel id="category-select-label">Категория</InputLabel>
+              <InputLabel id="category-select-label">Category</InputLabel>
               <Select
                 labelId="category-select-label"
                 value={category}
-                label="Категория"
+                label="Category"
                 onChange={handleCategoryChange}
-                aria-label="Выбор категории"
+                aria-label="Select category"
               >
                 {categories.map((cat) => (
                   <MenuItem key={cat.value} value={cat.value}>
@@ -188,7 +188,7 @@ const ProductList = () => {
                     gutterBottom
                     variant="h6"
                     component="h2"
-                    aria-label={`Продукт: ${product.name}`}
+                    aria-label={`Product: ${product.name}`}
                   >
                     {product.name}
                   </Typography>
@@ -196,7 +196,7 @@ const ProductList = () => {
                     variant="body2"
                     color="text.secondary"
                     sx={{ mb: 2 }}
-                    aria-label={`Описание: ${product.description}`}
+                    aria-label={`Description: ${product.description}`}
                   >
                     {product.description}
                   </Typography>
@@ -210,7 +210,7 @@ const ProductList = () => {
                     <Typography
                       variant="h6"
                       color="primary"
-                      aria-label={`Цена: ${product.price} Kč`}
+                      aria-label={`Price: ${product.price} Kč`}
                     >
                       {product.price} Kč
                     </Typography>
@@ -218,10 +218,10 @@ const ProductList = () => {
                       variant="contained"
                       color="primary"
                       startIcon={<FiShoppingCart />}
-                      aria-label={`Добавить ${product.name} в корзину`}
+                      aria-label={`Add ${product.name} to cart`}
                       onClick={() => handleAddToCart(product)}
                     >
-                      Купить
+                      Buy
                     </Button>
                   </Box>
                 </CardContent>
@@ -238,7 +238,7 @@ const ProductList = () => {
           onChange={handlePageChange}
           color="primary"
           size="large"
-          aria-label="Пагинация продуктов"
+          aria-label="Product pagination"
         />
       </Box>
     </Container>

@@ -47,11 +47,11 @@ function UserPanel({ setActivePanel }) {
     prijmeni: '',
     email: '',
     password: '',
-    roleIdRole: 1, // Добавлено: Роль по умолчанию
+    roleIdRole: 1, // Added: Default role
     zakaznikIdZakazniku: '',
     zamnestnanecIdZamnestnance: '',
   });
-  
+
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -73,8 +73,8 @@ function UserPanel({ setActivePanel }) {
       const response = await api.get('/api/util/roles');
       setRoles(response);
     } catch (error) {
-      console.error('Ошибка при загрузке ролей:', error);
-      setSnackbar({ open: true, message: 'Ошибка при загрузке ролей', severity: 'error' });
+      console.error('Error loading roles:', error);
+      setSnackbar({ open: true, message: 'Error loading roles', severity: 'error' });
     }
   };
 
@@ -85,8 +85,8 @@ function UserPanel({ setActivePanel }) {
       setUsers(response);
       setLoading(false);
     } catch (error) {
-      console.error('Ошибка при загрузке пользователей:', error);
-      setSnackbar({ open: true, message: 'Ошибка при загрузке пользователей', severity: 'error' });
+      console.error('Error loading users:', error);
+      setSnackbar({ open: true, message: 'Error loading users', severity: 'error' });
       setLoading(false);
     }
   };
@@ -106,20 +106,19 @@ function UserPanel({ setActivePanel }) {
             zakaznikIdZakazniku: user.zakaznikIdZakazniku || '',
             zamnestnanecIdZamnestnance: user.zamnestnanecIdZamnestnance || '',
           }
-        : { 
-            jmeno: '', 
-            prijmeni: '', 
-            email: '', 
+        : {
+            jmeno: '',
+            prijmeni: '',
+            email: '',
             telNumber: '',
-            password: '', 
-            roleIdRole: 1, // Роль по умолчанию
-            zakaznikIdZakazniku: '', 
-            zamnestnanecIdZamnestnance: '' 
-        }
+            password: '',
+            roleIdRole: 1, // Default role
+            zakaznikIdZakazniku: '',
+            zamnestnanecIdZamnestnance: '',
+          }
     );
     setFormOpen(true);
   };
-  
 
   // Close the user form
   const handleFormClose = () => {
@@ -136,27 +135,27 @@ function UserPanel({ setActivePanel }) {
         jmeno: formData.jmeno,
         prijmeni: formData.prijmeni,
         email: formData.email,
-        ...(selectedUser ? {} : { password: formData.password }), // Отправляется пароль только при создании нового пользователя
+        ...(selectedUser ? {} : { password: formData.password }), // Send password only when creating a new user
         roleIdRole: formData.roleIdRole,
         ...(!selectedUser ? { telNumber: formData.telNumber } : {}),
         zakaznikIdZakazniku: formData.zakaznikIdZakazniku || null,
-        zamnestnanecIdZamnestnance: ([2, 3].includes(formData.roleIdRole) ?  formData.zamnestnanecIdZamnestnance  : null) || null,
-      };      
+        zamnestnanecIdZamnestnance: ([2, 3].includes(formData.roleIdRole) ? formData.zamnestnanecIdZamnestnance : null) || null,
+      };
 
-      console.log(dataToSend)
+      console.log(dataToSend);
 
       if (selectedUser) {
         await api.put(`/api/users/${selectedUser.idUser}`, dataToSend);
-        setSnackbar({ open: true, message: 'Пользователь обновлен успешно', severity: 'success' });
+        setSnackbar({ open: true, message: 'User updated successfully', severity: 'success' });
       } else {
         await api.post('/api/users', dataToSend);
-        setSnackbar({ open: true, message: 'Пользователь добавлен успешно', severity: 'success' });
+        setSnackbar({ open: true, message: 'User added successfully', severity: 'success' });
       }
       fetchUsers();
       handleFormClose();
     } catch (error) {
-      console.error('Ошибка при сохранении пользователя:', error);
-      const errorMessage = error.response?.data || 'Ошибка при сохранении пользователя';
+      console.error('Error saving user:', error);
+      const errorMessage = error.response?.data || 'Error saving user';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
@@ -177,12 +176,12 @@ function UserPanel({ setActivePanel }) {
   const handleDelete = async () => {
     try {
       await api.delete(`/api/users/${selectedUser.idUser}`);
-      setSnackbar({ open: true, message: 'Пользователь удален успешно', severity: 'success' });
+      setSnackbar({ open: true, message: 'User deleted successfully', severity: 'success' });
       fetchUsers();
       handleDeleteConfirmClose();
     } catch (error) {
-      console.error('Ошибка при удалении пользователя:', error);
-      const errorMessage = error.response?.data || 'Ошибка при удалении пользователя';
+      console.error('Error deleting user:', error);
+      const errorMessage = error.response?.data || 'Error deleting user';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
@@ -220,7 +219,7 @@ function UserPanel({ setActivePanel }) {
   const filteredAndSortedUsers = useMemo(() => {
     // Apply search filter
     const filtered = users.filter((user) => {
-      const roleName = roles.find((role) => role.ID_ROLE === user.roleIdRole)?.ROLENAME || 'Неизвестно';
+      const roleName = roles.find((role) => role.ID_ROLE === user.roleIdRole)?.ROLENAME || 'Unknown';
       const searchStr = searchTerm.toLowerCase();
       return (
         user.idUser.toString().includes(searchStr) ||
@@ -254,13 +253,13 @@ function UserPanel({ setActivePanel }) {
       if (simulationToken) {
         // Start simulation
         simulateUser(simulationToken, user.email);
-        setSnackbar({ open: true, message: `Эмуляция начата для ${user.email}`, severity: 'success' });
+        setSnackbar({ open: true, message: `Simulation started for ${user.email}`, severity: 'success' });
       } else {
-        setSnackbar({ open: true, message: 'Не удалось получить токен для эмуляции', severity: 'error' });
+        setSnackbar({ open: true, message: 'Could not obtain simulation token', severity: 'error' });
       }
     } catch (error) {
-      console.error('Ошибка при начале эмуляции:', error);
-      const errorMessage = error.response?.data || 'Ошибка при начале эмуляции';
+      console.error('Error starting simulation:', error);
+      const errorMessage = error.response?.data || 'Error starting simulation';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
@@ -271,7 +270,7 @@ function UserPanel({ setActivePanel }) {
 
       <div style={{ flexGrow: 1, padding: '16px' }}>
         <Typography variant="h4" gutterBottom>
-          Пользователи
+          Users
         </Typography>
         <Button
           variant="contained"
@@ -280,7 +279,7 @@ function UserPanel({ setActivePanel }) {
           onClick={() => handleFormOpen()}
           style={{ marginBottom: '16px' }}
         >
-          Добавить пользователя
+          Add User
         </Button>
 
         {/* Search Bar */}
@@ -295,7 +294,7 @@ function UserPanel({ setActivePanel }) {
         >
           <FiSearch style={{ marginRight: '8px', color: '#888' }} />
           <TextField
-            placeholder="Поиск по всем полям..."
+            placeholder="Search all fields..."
             variant="standard"
             fullWidth
             value={searchTerm}
@@ -327,13 +326,13 @@ function UserPanel({ setActivePanel }) {
                       ID
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell>Имя</TableCell>
-                  <TableCell>Фамилия</TableCell>
+                  <TableCell>First Name</TableCell>
+                  <TableCell>Last Name</TableCell>
                   <TableCell>Email</TableCell>
-                  <TableCell>Роль</TableCell>
-                  <TableCell>ID Заказчика</TableCell>
-                  <TableCell>ID Сотрудника</TableCell>
-                  <TableCell align="right">Действия</TableCell>
+                  <TableCell>Role</TableCell>
+                  <TableCell>Customer ID</TableCell>
+                  <TableCell>Employee ID</TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -347,7 +346,7 @@ function UserPanel({ setActivePanel }) {
                         <TableCell>{user.prijmeni}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
-                          {roles.find((role) => role.ID_ROLE === user.roleIdRole)?.ROLENAME || 'Неизвестно'}
+                          {roles.find((role) => role.ID_ROLE === user.roleIdRole)?.ROLENAME || 'Unknown'}
                         </TableCell>
                         <TableCell>{user.zakaznikIdZakazniku || '—'}</TableCell>
                         <TableCell>{user.zamnestnanecIdZamnestnance || '—'}</TableCell>
@@ -367,7 +366,7 @@ function UserPanel({ setActivePanel }) {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} align="center">
-                      Нет данных
+                      No data
                     </TableCell>
                   </TableRow>
                 )}
@@ -388,13 +387,13 @@ function UserPanel({ setActivePanel }) {
 
         {/* User Add/Edit Form Dialog */}
         <Dialog open={formOpen} onClose={handleFormClose} fullWidth maxWidth="sm">
-          <DialogTitle>{selectedUser ? 'Редактировать пользователя' : 'Добавить пользователя'}</DialogTitle>
+          <DialogTitle>{selectedUser ? 'Edit User' : 'Add User'}</DialogTitle>
           <form onSubmit={handleFormSubmit}>
             <DialogContent>
               <TextField
                 autoFocus
                 margin="dense"
-                label="Имя"
+                label="First Name"
                 type="text"
                 fullWidth
                 required
@@ -403,7 +402,7 @@ function UserPanel({ setActivePanel }) {
               />
               <TextField
                 margin="dense"
-                label="Фамилия"
+                label="Last Name"
                 type="text"
                 fullWidth
                 required
@@ -433,7 +432,7 @@ function UserPanel({ setActivePanel }) {
               {!selectedUser && (
                 <TextField
                   margin="dense"
-                  label="Пароль"
+                  label="Password"
                   type="password"
                   fullWidth
                   required
@@ -443,10 +442,10 @@ function UserPanel({ setActivePanel }) {
               )}
               {/* Role Selection */}
               <FormControl fullWidth margin="dense" required>
-                <InputLabel id="role-select-label">Роль</InputLabel>
+                <InputLabel id="role-select-label">Role</InputLabel>
                 <Select
                   labelId="role-select-label"
-                  label="Роль"
+                  label="Role"
                   value={formData.roleIdRole}
                   onChange={(e) => setFormData({ ...formData, roleIdRole: e.target.value })}
                 >
@@ -460,7 +459,7 @@ function UserPanel({ setActivePanel }) {
               {/* Optional Fields */}
               {selectedUser && (
                 <TextField
-                  label="ID заказчика"
+                  label="Customer ID"
                   variant="outlined"
                   fullWidth
                   value={formData.zakaznikIdZakazniku}
@@ -469,20 +468,20 @@ function UserPanel({ setActivePanel }) {
                 />
               )}
               {[2, 3].includes(formData.roleIdRole) && (
-              <TextField
-                margin="dense"
-                label="ID Сотрудника"
-                type="number"
-                fullWidth
-                value={formData.zamnestnanecIdZamnestnance}
-                onChange={(e) => setFormData({ ...formData, zamnestnanecIdZamnestnance: e.target.value })}
-              />
-            )}
+                <TextField
+                  margin="dense"
+                  label="Employee ID"
+                  type="number"
+                  fullWidth
+                  value={formData.zamnestnanecIdZamnestnance}
+                  onChange={(e) => setFormData({ ...formData, zamnestnanecIdZamnestnance: e.target.value })}
+                />
+              )}
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleFormClose}>Отмена</Button>
+              <Button onClick={handleFormClose}>Cancel</Button>
               <Button type="submit" color="primary">
-                Сохранить
+                Save
               </Button>
             </DialogActions>
           </form>
@@ -490,16 +489,16 @@ function UserPanel({ setActivePanel }) {
 
         {/* Delete Confirmation Dialog */}
         <Dialog open={deleteConfirmOpen} onClose={handleDeleteConfirmClose}>
-          <DialogTitle>Удалить пользователя?</DialogTitle>
+          <DialogTitle>Delete User?</DialogTitle>
           <DialogContent>
             <Typography>
-              Вы уверены, что хотите удалить пользователя с ID {selectedUser?.idUser}?
+              Are you sure you want to delete the user with ID {selectedUser?.idUser}?
             </Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDeleteConfirmClose}>Отмена</Button>
+            <Button onClick={handleDeleteConfirmClose}>Cancel</Button>
             <Button onClick={handleDelete} color="secondary">
-              Удалить
+              Delete
             </Button>
           </DialogActions>
         </Dialog>

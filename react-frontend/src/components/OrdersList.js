@@ -16,6 +16,9 @@ import {
 import { styled } from "@mui/system";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import api from "../services/api";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import QRCode from 'qrcode'; // npm install qrcode
 
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: "1.5rem",
@@ -32,8 +35,8 @@ const ProductImage = styled(Avatar)(({ theme }) => ({
   height: 120,
   borderRadius: "12px",
   boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-  backgroundSize: "cover", // Background image
-  backgroundPosition: "center", // Center the image
+  backgroundSize: "cover",
+  backgroundPosition: "center",
 }));
 
 const OrdersList = () => {
@@ -45,7 +48,7 @@ const OrdersList = () => {
   const fetchProductImage = async (productId) => {
     const response = await api.get(`/api/products/image/${productId}`);
     const base64Image = response; // Base64 string
-    const imageSrc = `data:image/png;base64,${base64Image}`; // Construct the image source string
+    const imageSrc = `data:image/png;base64,${base64Image}`;
     return imageSrc;
   };
 
@@ -59,10 +62,10 @@ const OrdersList = () => {
           response.map(async (order) => {
             const productsWithImages = await Promise.all(
               order.products.map(async (product) => {
-                const imageUrl = await fetchProductImage(product.id); // Fetch image
+                const imageUrl = await fetchProductImage(product.id);
                 return {
                   ...product,
-                  imageUrl, // Add image URL
+                  imageUrl,
                 };
               })
             );
@@ -91,15 +94,68 @@ const OrdersList = () => {
 
   const filteredOrders = orders.filter((order) => {
     return (
-      order.idObjednavky.toString().includes(searchTerm) || // Search by Order ID
-      order.stav.toLowerCase().includes(searchTerm) || // Search by Status
-      order.datum.toLocaleString().includes(searchTerm) || // Search by Date
+      order.idObjednavky.toString().includes(searchTerm) ||
+      order.stav.toLowerCase().includes(searchTerm) ||
+      order.datum.toLocaleString().includes(searchTerm) ||
       order.products.some((product) =>
-        product.name.toLowerCase().includes(searchTerm) || // Search by Product Name
-        product.id.toString().includes(searchTerm) // Search by Product ID
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.id.toString().includes(searchTerm)
       )
     );
   });
+
+  const handleDownloadPDF = async (order) => {
+    const doc = new jsPDF();
+    doc.setFontSize(12);
+
+    // Допустим, у нас есть страница заказа:
+    const orderUrl = `http://localhost:3000/`;
+
+    // Генерируем QR-код в base64 dataURL
+    const qrCodeDataURL = await QRCode.toDataURL(orderUrl);
+
+    // Заголовок и основные детали
+    doc.text(`Order #${order.idObjednavky}`, 10, 10);
+    doc.text(`Date: ${new Date(order.datum).toLocaleDateString()}`, 10, 50);
+    doc.text(`Status: ${order.stav}`, 10, 60);
+    doc.text(`Coast: ${order.payment.suma}`, 10, 70);
+
+    if (order.payment.typ === 'hp') {
+      doc.text(`Paid by cash`, 10, 80);
+    } else if (order.payment.typ === 'cc') {
+      doc.text(`Paid by card`, 10, 80);
+    }
+
+    if (order.customer) {
+      doc.text(`Customer: ${order.customer.jmeno} ${order.customer.prijmeni}`, 10, 20);
+      doc.text(`Phone number: ${order.customer.telefon}`, 10, 30);
+    }
+    if (order.address) {
+      doc.text(`Address: ${order.address.ulice}, ${order.address.mesto}, ${order.address.psc}`, 10, 40);
+    }
+
+
+    // Вставляем QR-код в документ
+    // Позиция и размер QR-кода (x, y, width, height)
+    doc.addImage(qrCodeDataURL, 'PNG', 150, 10, 50, 50);
+
+    // Таблица с продуктами
+    const tableColumn = ["Product Name", "Price", "Quantity"];
+    const tableRows = order.products.map((product) => [
+      product.name,
+      product.price.toString(),
+      product.quantity.toString(),
+    ]);
+
+    doc.autoTable({
+      startY: 90,
+      head: [tableColumn],
+      body: tableRows,
+    });
+
+    // Сохранить PDF
+    doc.save(`order_${order.idObjednavky}.pdf`);
+  };
 
   if (loading) {
     return (
@@ -120,7 +176,6 @@ const OrdersList = () => {
           Order History
         </Typography>
 
-        {/* Search Field */}
         <TextField
           label="Search Orders"
           variant="outlined"
@@ -140,7 +195,7 @@ const OrdersList = () => {
                 <Typography variant="body2" color="text.secondary">
                   {new Date(order.datum).toLocaleDateString()}
                 </Typography>
-                <Box sx={{ ml: "auto" }}>
+                <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
                   <Button
                     variant="outlined"
                     size="small"
@@ -149,8 +204,16 @@ const OrdersList = () => {
                   >
                     {expandedOrder === order.idObjednavky ? "Hide Details" : "Show Details"}
                   </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => handleDownloadPDF(order)}
+                  >
+                    Download PDF
+                  </Button>
                 </Box>
               </Box>
+
 
               <Collapse in={expandedOrder === order.idObjednavky}>
                 <Divider sx={{ my: 3 }} />
@@ -173,8 +236,11 @@ const OrdersList = () => {
                       }}
                     >
                       <ProductImage>
-                        {/* Display the image using <img /> tag */}
-                        <img src={product.imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
                       </ProductImage>
                       <Box>
                         <Typography variant="subtitle1">{product.name}</Typography>
